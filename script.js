@@ -1,6 +1,8 @@
 // Pole s informacemi o kapitolách
 const chapters = [
-  { src: "https://dl.dropboxusercontent.com/scl/fi/bski2kzexy3qdlbmgsxss/kapitola-1.wav?rlkey=na7nywvdr4qtx0r7jwd60s7it&st=ruqnq79s&dl=1", character: "Postava 1", manuallyEdited: false, lastEditedAt: null },
+  // === TADY PŘÍJDE OBSAH AUDIO KAPITOL ===
+    
+    { src: "https://dl.dropboxusercontent.com/scl/fi/bski2kzexy3qdlbmgsxss/kapitola-1.wav?rlkey=na7nywvdr4qtx0r7jwd60s7it&st=ruqnq79s&dl=1", character: "Postava 1", manuallyEdited: false, lastEditedAt: null },
   { src: "https://dl.dropboxusercontent.com/scl/fi/9jqh1qe1t4y5b1esu7z51/kapitola-2.wav?rlkey=zycm6m6prvht4g9pbe9c7relr&st=7cmik9w2&dl=1", character: "Postava 2", manuallyEdited: false, lastEditedAt: null },
   { src: "https://dl.dropboxusercontent.com/scl/fi/2x6h3c6wqp8k5w56g2hze/kapitola-3.wav?rlkey=83zmb0kqo1cc8gt6vffq7m0iv&st=d5wzr9w4&dl=1", character: "Postava 3", manuallyEdited: false, lastEditedAt: null },
   
@@ -40,14 +42,14 @@ const chapters = [
 { src: "https://dl.dropboxusercontent.com/scl/fi/futnm4de91g7h7p3wdnfi/kapitola-37.wav?rlkey=2lxjgnif2p69m05opdv8cicso&st=duwlnbvt&dl=1", character: "Postava 37", manuallyEdited: false, lastEditedAt: null },
 { src: "https://dl.dropboxusercontent.com/scl/fi/p0tzlrzqj6er1j56b7prt/kapitola-38.wav?rlkey=lnbu8a9qpvu7h3okcuh4lrvd5&st=0id8ccwb&dl=1", character: "Postava 38", manuallyEdited: false, lastEditedAt: null },    
 { src: "https://dl.dropboxusercontent.com/scl/fi/brgz7nh2es7ck9ubt08yg/kapitola-39.wav?rlkey=d2svq670defuk8feoesusedip&st=sbd9ngfz&dl=1", character: "Postava 39", manuallyEdited: false, lastEditedAt: null }, 
-{ src: "https://dl.dropboxusercontent.com/scl/fi/jnatm6xldsffkvgbyscd9/kapitola-40.wav?rlkey=5ewmyq66dz5jkn1a6tkbj1nae&st=gl4jd6yx&dl=1", character: "Postava 40", manuallyEdited: false, lastEditedAt: null },    
+{ src: "https://dl.dropboxusercontent.com/scl/fi/jnatm6xldsffkvgbyscd9/kapitola-40.wav?rlkey=5ewmyq66dz5jkn1a6tkbj1nae&st=gl4jd6yx&dl=1", character: "Postava 40", manuallyEdited: false, lastEditedAt: null }, 
 ];
+
 let currentAudio = null;
 let isPaused = false;
 let currentChapterIndex = 0;
 
-        
-        
+
 function showChapter(chapterNumber) {
   // Skryje všechny kapitoly
   const chapters = document.querySelectorAll('.chapter');
@@ -75,16 +77,19 @@ function playAudio(chapterIndex) {
 
   // Vytvoříme nový audio element a nastavíme zdroj
   const audio = new Audio(chapters[chapterIndex].src);
-  audio.play();
+  audio.play().catch(error => {
+    console.warn(`⚠️ Kapitola ${chapterIndex + 1}: Audio se nepodařilo přehrát - ${error.message}`);
+  });
   currentAudio = audio;
 
   // Zobrazíme jméno postavy
   const characterDisplay = document.createElement('div');
   characterDisplay.classList.add('character-display');
   characterDisplay.textContent = chapters[chapterIndex].character;
-  
-  // Přidáme element na stránku (volitelně)
-  document.querySelector('.active').appendChild(characterDisplay);
+
+  // Přidáme element na stránku
+  const activeChapter = document.querySelector('.chapter.active');
+  if (activeChapter) activeChapter.appendChild(characterDisplay);
 }
 
 function pauseAudio() {
@@ -96,18 +101,24 @@ function pauseAudio() {
 
 function resumeAudio() {
   if (currentAudio && isPaused) {
-    currentAudio.play();
+    currentAudio.play().catch(error => {
+      console.warn(`⚠️ Resume selhal - ${error.message}`);
+    });
     isPaused = false;
   }
 }
 
 function stopAudio() {
   if (currentAudio) {
-    currentAudio.pause();
-    currentAudio.currentTime = 0;
+    try {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    } catch (error) {
+      console.warn(`⚠️ Stop selhal - ${error.message}`);
+    }
     currentAudio = null;
     isPaused = false;
-    
+
     // Odstraníme zobrazené jméno postavy, pokud existuje
     const characterDisplays = document.querySelectorAll('.character-display');
     characterDisplays.forEach(display => display.remove());
@@ -118,39 +129,42 @@ function stopAudio() {
 document.addEventListener('DOMContentLoaded', function() {
   // Nastavíme výchozí kapitolu
   showChapter(1);
-  
+
   // Přidáme event listenery pro všechna tlačítka ve všech kapitolách
   document.querySelectorAll('.chapter').forEach((chapter, chapterIndex) => {
-    // Získáme tlačítka v této kapitole
-    const chapterButtonsPlay = chapter.querySelector('.play-btn');
+    const chapterButtonsPlay  = chapter.querySelector('.play-btn');
     const chapterButtonsPause = chapter.querySelector('.pause-btn');
-    const chapterButtonsStop = chapter.querySelector('.stop-btn');
-    const characterBtns = chapter.querySelectorAll('.character-btn');
-    
+    const chapterButtonsStop  = chapter.querySelector('.stop-btn');
+    const characterBtns       = chapter.querySelectorAll('.character-btn');
+
     // Nastavíme události pro tlačítka postav v této kapitole
     characterBtns.forEach((btn) => {
       btn.addEventListener('click', () => {
-        // Získáme data-index z tlačítka
         const dataIndex = parseInt(btn.getAttribute('data-index'));
         playAudio(dataIndex);
       });
     });
-    
-    // Přidáme události pro tlačítka přehrávání v této kapitole
-    chapterButtonsPlay.addEventListener('click', () => {
-      if (isPaused && currentAudio) {
-        resumeAudio();
-      } else {
-        // Pokud je chapterIndex číslo kapitoly, potřebujeme odečíst 1 pro index v poli
-        playAudio(parseInt(chapter.id.replace('chapter', '')) - 1);
-      }
-    });
-    
-    chapterButtonsPause.addEventListener('click', pauseAudio);
-    chapterButtonsStop.addEventListener('click', stopAudio);
+
+    // Ochrana proti null elementům
+    if (chapterButtonsPlay) {
+      chapterButtonsPlay.addEventListener('click', () => {
+        if (isPaused && currentAudio) {
+          resumeAudio();
+        } else {
+          playAudio(parseInt(chapter.id.replace('chapter', '')) - 1);
+        }
+      });
+    }
+
+    if (chapterButtonsPause) chapterButtonsPause.addEventListener('click', pauseAudio);
+    if (chapterButtonsStop)  chapterButtonsStop.addEventListener('click', stopAudio);
   });
 });
-   
+
+// --- Oprava URL adres pro stabilní streamování ---
+/**
+ * Optimalizuje URL pro přímé streamování (verze 2026).
+ */
 function checkAndFixChapters(chapters) {
     let fixedUrls = 0;
     let validChapters = 0;
@@ -200,3 +214,13 @@ function checkAndFixChapters(chapters) {
 
 // Spuštění kontroly a uložení opraveného pole kapitol
 const fixedChapters = checkAndFixChapters(chapters);
+
+// === ZÁVĚREČNÉ HLÁŠENÍ Z MŮSTKU ===
+console.log("🚀 SCRIPT.JS - HLÁŠENÍ Z MŮSTKU");
+console.log("📦 Pole kapitol         : načteno");
+console.log("🎵 Audio funkce         : aktivní");
+console.log("🔧 Servisní kód         : 2026 protokol");
+console.log("🛡️  Error handling       : aktivní");
+console.log("📡 DevTools zpětná vazba: aktivní");
+console.log(`✅ Celkem kapitol       : ${chapters.length}`);
+console.log("🖖 Hvězdná flotila online!");
