@@ -151,37 +151,51 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
    
- function checkAndFixChapters(chapters) {
+function checkAndFixChapters(chapters) {
     let fixedUrls = 0;
     let validChapters = 0;
-    
-    // Kontrola každé kapitoly v poli
+
     chapters.forEach((chapter, index) => {
-        // Kontrola a oprava URL adresy
         if (chapter.src) {
-            // Oprava Dropbox URL (změna dl=0 na dl=1)
-            if (chapter.src.includes("dl=0")) {
-                chapter.src = chapter.src.replace("dl=0", "dl=1");
-                fixedUrls++;
+            // === 2026 PROTOCOL - nové oblečení pro URL opravu ===
+            if (chapter.src.includes("www.dropbox.com")) {
+                let url = new URL(chapter.src);
+
+                if (url.searchParams.has("dl")) {
+                    url.searchParams.set("raw", "1");
+                    url.searchParams.delete("dl");
+                }
+                if (!url.searchParams.has("raw")) {
+                    url.searchParams.append("raw", "1");
+                }
+
+                let finalSrc = url.toString()
+                    .replace("www.dropbox.com", "dl.dropboxusercontent.com")
+                    .replace("http://", "https://");
+
+                if (chapter.src !== finalSrc) {
+                    chapter.src = finalSrc;
+                    fixedUrls++;
+                }
             }
-            
+
             // Kontrola zda URL obsahuje ADRESA
             if (chapter.src.includes("ADRESA")) {
                 console.warn(`⚠️ Kapitola ${index + 1} (${chapter.character}): Neplatná URL adresa`);
             }
         }
-        
+
         // Kontrola validity kapitoly
         if (typeof chapter === 'object' && chapter.character && chapter.character.trim()) {
             validChapters++;
         }
     });
-    
+
     // Souhrnný výpis na dva řádky
     console.log(`✅ Kontrola dokončena - Celkem kapitol: ${chapters.length}, Opraveno URL: ${fixedUrls}`);
     console.log(`🔍 Platných kapitol: ${validChapters}, Zkontrolováno URL: ${chapters.length}`);
-    
-    return chapters; // Vrátíme opravené pole pro případné další použití
+
+    return chapters;
 }
 
 // Spuštění kontroly a uložení opraveného pole kapitol
