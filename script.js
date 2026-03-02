@@ -2,7 +2,7 @@
 const chapters = [
   // === TADY PŘÍJDE OBSAH AUDIO KAPITOL ===
     
-    { src: "https://dl.dropboxusercontent.com/scl/fi/bski2kzexy3qdlbmgsxss/kapitola-1.wav?rlkey=na7nywvdr4qtx0r7jwd60s7it&st=ruqnq79s&dl=1", character: "Postava 1", manuallyEdited: false, lastEditedAt: null },
+     { src: "https://dl.dropboxusercontent.com/scl/fi/bski2kzexy3qdlbmgsxss/kapitola-1.wav?rlkey=na7nywvdr4qtx0r7jwd60s7it&st=ruqnq79s&dl=1", character: "Postava 1", manuallyEdited: false, lastEditedAt: null },
   { src: "https://dl.dropboxusercontent.com/scl/fi/9jqh1qe1t4y5b1esu7z51/kapitola-2.wav?rlkey=zycm6m6prvht4g9pbe9c7relr&st=7cmik9w2&dl=1", character: "Postava 2", manuallyEdited: false, lastEditedAt: null },
   { src: "https://dl.dropboxusercontent.com/scl/fi/2x6h3c6wqp8k5w56g2hze/kapitola-3.wav?rlkey=83zmb0kqo1cc8gt6vffq7m0iv&st=d5wzr9w4&dl=1", character: "Postava 3", manuallyEdited: false, lastEditedAt: null },
   
@@ -45,14 +45,13 @@ const chapters = [
 { src: "https://dl.dropboxusercontent.com/scl/fi/jnatm6xldsffkvgbyscd9/kapitola-40.wav?rlkey=5ewmyq66dz5jkn1a6tkbj1nae&st=gl4jd6yx&dl=1", character: "Postava 40", manuallyEdited: false, lastEditedAt: null }, 
 ];
 
-
 let currentAudio = null;
 let isPaused = false;
 let currentChapterIndex = 0;
 
 
 function showChapter(chapterNumber) {
-    // Skryje všechny kapitoly
+  // Skryje všechny kapitoly
   const chapters = document.querySelectorAll('.chapter');
   chapters.forEach(chapter => chapter.classList.remove('active'));
 
@@ -131,17 +130,15 @@ document.addEventListener('DOMContentLoaded', function() {
   showChapter(1);
 
   // Přidáme event listenery pro všechna tlačítka ve všech kapitolách
- document.querySelectorAll('.chapter').forEach((chapter, chapterIndex) => {
-    // Získáme tlačítka v této kapitole
-    const chapterButtonsPlay = chapter.querySelector('.play-btn');
-  //  const chapterButtonsPause = chapter.querySelector('.pause-btn');
-    const chapterButtonsStop = chapter.querySelector('.stop-btn');
-    const characterBtns = chapter.querySelectorAll('.character-btn');
-    
+  document.querySelectorAll('.chapter').forEach((chapter, chapterIndex) => {
+    const chapterButtonsPlay  = chapter.querySelector('.play-btn');
+    const chapterButtonsPause = chapter.querySelector('.pause-btn');
+    const chapterButtonsStop  = chapter.querySelector('.stop-btn');
+    const characterBtns       = chapter.querySelectorAll('.character-btn');
+
     // Nastavíme události pro tlačítka postav v této kapitole
     characterBtns.forEach((btn) => {
       btn.addEventListener('click', () => {
-        // Získáme data-index z tlačítka
         const dataIndex = parseInt(btn.getAttribute('data-index'));
         playAudio(dataIndex);
       });
@@ -158,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
 
-  //  if (chapterButtonsPause) chapterButtonsPause.addEventListener('click', pauseAudio);
+    if (chapterButtonsPause) chapterButtonsPause.addEventListener('click', pauseAudio);
     if (chapterButtonsStop)  chapterButtonsStop.addEventListener('click', stopAudio);
   });
 });
